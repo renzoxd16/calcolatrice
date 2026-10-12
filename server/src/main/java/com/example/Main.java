@@ -6,65 +6,63 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
-    /**
-     * @param args
-     * @return 
-     * @throws IOException
-     */
-    public static void main(String[] args) throws Exception {
-        System.out.println("server");
-
-
-        ServerSocket ss = new ServerSocket(3000);
-        Socket s = ss.accept();
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+    public static void main(String[] args) {
+        System.out.println("Server avviato e in ascolto sulla porta 3000...");
+        
     
-      
-        double numero1;
-        double numero2;
-        String operazione = " ";
-        double risultato = 0.0;
-        
-        
-             while (true) {
+        ExecutorService pool = Executors.newCachedThreadPool();
 
-                String temp1=in.readLine();
-                String temp2=in.readLine();
-                operazione = in.readLine();
-
+        try (ServerSocket ss = new ServerSocket(3000)) {
+            while (true) {
+                Socket clientSocket = ss.accept();
+                System.out.println("Nuovo client connesso: " + clientSocket.getRemoteSocketAddress());
                 
-
-            
-                numero1 = Double.parseDouble(temp1);
-                numero2 = Double.parseDouble(temp2);
-                
-                if(operazione.toLowerCase().equals("exit")){
-                    out.println("programma terminato");
-                }else if( numero2 == 0 && (operazione.equals("divisione") || operazione.equals("/"))){
-                    throw new Exception("Errore divisione per zero");
-                }else if(operazione.equals("addizione")|| operazione.equals("+")){
-                    risultato=numero1+numero2;
-                    out.println(risultato);
-                }else if(operazione.equals("sottrazione") || operazione.equals("-")){
-                    risultato=numero1-numero2;  
-                    out.println(risultato);             
-                }else if(operazione.equals("moltiplicazione" ) || operazione.equals("*")){
-                    risultato=numero1*numero2;
-                    out.println(risultato);
-                }else if(operazione.equals("divisione") || operazione.equals("/")){
-                    risultato=numero1/numero2;
-                    out.println(risultato);
-                }
-
-
-
+              
+                pool.execute(new ClientHandler(clientSocket));
             }
-             
-             
+        } catch (IOException e) {
+            System.err.println("Errore del server: " + e.getMessage());
+        } finally {
+            pool.shutdown();
+        }
     }
-       
 }
+
+
+class ClientHandler implements Runnable {
+    private final Socket clientSocket;
+
+    public ClientHandler(Socket socket) {
+        this.clientSocket = socket;
+    }
+
+    @Override
+    public void run() {
+        try (
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
+        ) {
+            String inputLine;
+          
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println("Ricevuto: " + inputLine);
+                out.println("Echo: " + inputLine);
+            }
+        } catch (IOException e) {
+            System.err.println("Errore nella gestione del client: " + e.getMessage());
+        } finally {
+            try {
+                clientSocket.close();
+                System.out.println("Connessione chiusa con il client.");
+            } catch (IOException e) {
+                System.err.println("Impossibile chiudere il socket del client: " + e.getMessage());
+            }
+        }
+    }
+}
+
+
