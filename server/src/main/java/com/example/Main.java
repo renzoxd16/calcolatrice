@@ -24,71 +24,47 @@ public class Main {
         PrintWriter out = new PrintWriter(s.getOutputStream(), true);
     
       
-        int numero1;
-        int numero2;
-        float risultato = 0;
-        String operazione;
-        String temp1=in.readLine();
-        String temp2=in.readLine();
-    
+        double numero1;
+        double numero2;
+        String operazione = " ";
+        double risultato = 0.0;
+        
         
              while (true) {
 
-            
-                numero1 = Integer.parseInt(temp1);
-                numero2 = Integer.parseInt(temp2);
+                String temp1=in.readLine();
+                String temp2=in.readLine();
                 operazione = in.readLine();
 
-                 if( numero2 == 0 ||operazione=="divisione" && operazione=="/"){
-                    throw new Exception("Errore divsione per zero");     
-                }
-    
                 
-                if(operazione.equalsIgnoreCase("exit")){
 
-                    break;
-                }
-              
-                if(operazione=="adizione"){
-                    
+            
+                numero1 = Double.parseDouble(temp1);
+                numero2 = Double.parseDouble(temp2);
+                
+                if(operazione.toLowerCase().equals("exit")){
+                    out.println("programma terminato");
+                }else if( numero2 == 0 && (operazione.equals("divisione") || operazione.equals("/"))){
+                    throw new Exception("Errore divisione per zero");
+                }else if(operazione.equals("addizione")|| operazione.equals("+")){
                     risultato=numero1+numero2;
-                
-               }
+                    out.println(risultato);
+                }else if(operazione.equals("sottrazione") || operazione.equals("-")){
+                    risultato=numero1-numero2;  
+                    out.println(risultato);             
+                }else if(operazione.equals("moltiplicazione" ) || operazione.equals("*")){
+                    risultato=numero1*numero2;
+                    out.println(risultato);
+                }else if(operazione.equals("divisione") || operazione.equals("/")){
+                    risultato=numero1/numero2;
+                    out.println(risultato);
+                }
 
-              
-               if(operazione=="sottrazione"){
 
-                 risultato=numero1-numero2;
-                    
-                
-               }
-
-               if(operazione=="moltiplicazione"){
-
-                risultato=numero1*numero2;
-
-                
-               }
-
-               if(operazione=="divisione"){
-
-                 risultato=numero1/numero2;
-                
-                   
-                
-               }
-                System.out.println(risultato);
 
             }
              
              
     }
        
-
 }
-           
-
-  
-
-
- 
